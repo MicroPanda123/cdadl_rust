@@ -1,16 +1,16 @@
-// use crate::folder::*;
-
-// mod folder;
 use crate::webdriver::*;
+use crate::folder::*;
+
 mod webdriver;
+mod folder;
 
 #[tokio::main]
 async fn main(){
-    let driver = init_driver();
-    println!("{:?}",webtest(driver.await.unwrap(), "https://www.cda.pl/video/748082819").await.unwrap().url);
-    // let link = "https://www.cda.pl/MarcinXvZ/folder/32310244";
-    // let links = fetch_video_links(link).unwrap();
-    // for link2 in links.iter() {
-    //     println!("{:?}", link2);
-    // }
+    let f_link = "{link}";
+    let links = fetch_video_links(f_link).await.unwrap();
+    let linki = webtest(links).await.unwrap();
+    for link in linki {
+        print!("{:?} --- ", link.name);
+        println!("{:?}", link.url);
+    }
 }

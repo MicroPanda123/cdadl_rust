@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use thirtyfour::prelude::*;
 
 pub struct VideoLink {
@@ -5,35 +6,22 @@ pub struct VideoLink {
     pub url: String
 }
 
-impl VideoLink {
-    fn new() -> VideoLink {
-        VideoLink {
-            name: "".to_string(),
-            url: "".to_string()
-        }
-    }
-}
+pub async fn webtest(url: HashSet<String>) -> WebDriverResult<Vec<VideoLink>> {
+    let mut res: Vec<VideoLink> = vec![];
 
-pub async fn init_driver() -> Result<WebDriver, WebDriverError> {
     let mut caps = DesiredCapabilities::firefox();
     caps.set_headless().unwrap();
-    let driver = WebDriver::new("http://localhost:4444", caps);
-    driver.await
-}
+    let driver = WebDriver::new("http://localhost:4444", caps).await?;
 
-pub async fn webtest(driver: WebDriver, url: &str) -> WebDriverResult<VideoLink> {
-    let mut res = VideoLink::new();
+    for link in url {
+        driver.goto(link).await?;
 
-    // Navigate to https://wikipedia.org.
-    driver.goto(url).await?;
+        let videoplayer = driver.find(By::ClassName("pb-video-player")).await?;
+        let name = driver.find(By::Id("naglowek")).await?;
+        let url = videoplayer.attr("src").await?;
 
-    let videoplayer = driver.find(By::ClassName("pb-video-player")).await?;
-    let name = driver.find(By::Id("naglowek")).await?;
-    let url = videoplayer.attr("src").await?;
-
-    res.name = name.text().await?;
-    res.url = url.unwrap();
-
+        res.push(VideoLink { name: name.text().await?, url: url.unwrap() });
+    }
     driver.quit().await?;
 
     return Ok(res);
