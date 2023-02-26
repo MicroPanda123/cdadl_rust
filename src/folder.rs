@@ -23,6 +23,5 @@ pub async fn fetch_video_links(url: &str) -> Result<HashSet<String>, reqwest::Er
             }
         }
     }
-    println!("1");
     Ok(video_links.into_iter().collect())
 }
